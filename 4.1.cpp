@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <math.h>
+
  
 using namespace std;
  
@@ -18,7 +18,7 @@ struct  Point
         @param x - абсцисса
         @param y - ордината
         */
-        Point(const T x = 0, const T y = 0);
+        Point(const T x , const T y );
         /*
         @brief Перегрузка оператора потока вывода
         @param os поток вывода
