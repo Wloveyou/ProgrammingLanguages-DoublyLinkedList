@@ -323,7 +323,7 @@ template<typename T , typename U>
  
 template<typename T , typename U>
 Text<T , U>::Text(const std::string& text, const Font<U>& font, const Point<T>& start_point)
-	:text(text), font(font), start_point(start_point)
+	:start_point(start_point), font(font), text(text)
 {
 }
  
