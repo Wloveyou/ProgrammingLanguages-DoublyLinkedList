@@ -1,141 +1,176 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
-
 using namespace std;
 
-const int MAX_ROWS = 100;
-const int MAX_COLS = 100;
+// Функция для создания многомерного массива n x m из n целых чисел
+int** create_array(int n, int m) {
+    // Выделяем память для массива указателей на строки
+    int** array = new int*[n];
+    // Выделяем память для каждой строки
+    for (int i = 0; i < n; i++) {
+        array[i] = new int[m];
+    }
+    return array;
+}
 
-void fillMatrix(int matrix[MAX_ROWS][MAX_COLS], int rows, int cols) {
-    cout << "Выберите способ заполнения массива:" << endl;
-    cout << "1. Случайные числа" << endl;
-    cout << "2. Ввод с клавиатуры" << endl;
-    int choice;
-    cin >> choice;
-
-    if (choice == 1) {
-        srand(time(0));  // Инициализация генератора случайных чисел
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                matrix[i][j] = rand() % 100;  // Генерация случайного числа от 0 до 99
-            }
-        }
-    } else if (choice == 2) {
-        cout << "Введите элементы массива:" << endl;
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                cin >> matrix[i][j];
-            }
+// Функция для заполнения массива случайными числами
+void fill_random(int** array, int n, int m) {
+    // Инициализируем генератор случайных чисел
+    srand(time(NULL));
+    // Заполняем массив случайными числами в диапазоне от 0 до 99
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            array[i][j] = rand() % 100;
         }
     }
 }
 
-void printMatrix(int matrix[MAX_ROWS][MAX_COLS], int rows, int cols) {
+// Функция для заполнения массива с клавиатуры
+void fill_keyboard(int** array, int n, int m) {
+    // Запрашиваем у пользователя ввод элементов массива
+    cout << "Введите элементы массива:" << endl;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            cin >> array[i][j];
+        }
+    }
+}
+
+// Функция для вывода массива на экран
+void print_array(int** array, int n, int m) {
+    // Выводим элементы массива в виде таблицы
     cout << "Массив:" << endl;
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            cout << matrix[i][j] << " ";
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            cout << array[i][j] << "\t";
         }
         cout << endl;
     }
 }
 
-void replaceMaxWithColumn(int matrix[MAX_ROWS][MAX_COLS], int rows, int cols) {
-    for (int i = 0; i < rows; i++) {
-        int maxElement = matrix[i][0];
-        int maxColumn = 0;
-
-        // Находим максимальный элемент и его столбец
-        for (int j = 1; j < cols; j++) {
-            if (matrix[i][j] > maxElement) {
-                maxElement = matrix[i][j];
-                maxColumn = j;
+// Функция для замены максимального элемента каждой строки номером столбца, в котором он находится
+void replace_max(int** array, int n, int m) {
+    // Проходим по каждой строке массива
+    for (int i = 0; i < n; i++) {
+        // Инициализируем максимальный элемент и его индекс
+        int max = array[i][0];
+        int max_index = 0;
+        // Ищем максимальный элемент и его индекс в строке
+        for (int j = 1; j < m; j++) {
+            if (array[i][j] > max) {
+                max = array[i][j];
+                max_index = j;
             }
         }
-
         // Заменяем максимальный элемент номером столбца
-        matrix[i][maxColumn] = maxColumn;
+        array[i][max_index] = max_index;
     }
 }
 
-void insertRowsAfterMin(int matrix[MAX_ROWS][MAX_COLS], int& rows, int cols) {
-    int minElement = matrix[0][0];
-
-    // Находим минимальный элемент
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            if (matrix[i][j] < minElement) {
-                minElement = matrix[i][j];
+// Функция для вставки после всех строк, содержащих минимальный элемент массива, строки 2, 4, 6, ...
+void insert_row(int**& array, int& n, int m) {
+    // Инициализируем минимальный элемент массива
+    int min = array[0][0];
+    // Ищем минимальный элемент массива
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (array[i][j] < min) {
+                min = array[i][j];
             }
         }
     }
-
-    // Вычисляем количество строк для вставки
-    int insertRowsCount = 0;
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            if (matrix[i][j] == minElement) {
-                insertRowsCount++;
+    // Считаем количество строк, содержащих минимальный элемент
+    int count = 0;
+    for (int i = 0; i < n; i++) {
+        bool found = false;
+        for (int j = 0; j < m; j++) {
+            if (array[i][j] == min) {
+                found = true;
                 break;
             }
         }
+        if (found) {
+            count++;
+        }
     }
-
-    // Вставляем строки
-    int newRows = rows + insertRowsCount;
-    int newMatrix[MAX_ROWS][MAX_COLS];
-
-    int newRow = 0;
-    for (int i = 0; i < rows; i++) {
-        bool insertRow = false;
-
-        for (int j = 0; j < cols; j++) {
-            if (matrix[i][j] == minElement) {
-                insertRow = true;
+    // Создаем новый массив с увеличенным количеством строк
+    int** new_array = create_array(n + count, m);
+    // Копируем элементы из старого массива в новый, вставляя новые строки
+    int k = 0; // Индекс для нового массива
+    for (int i = 0; i < n; i++) {
+        // Копируем текущую строку из старого массива
+        for (int j = 0; j < m; j++) {
+            new_array[k][j] = array[i][j];
+        }
+        k++;
+        // Проверяем, содержит ли текущая строка минимальный элемент
+        bool found = false;
+        for (int j = 0; j < m; j++) {
+            if (array[i][j] == min) {
+                found = true;
                 break;
             }
         }
-
-        // Копируем текущую строку в новую матрицу
-        for (int j = 0; j < cols; j++) {
-            newMatrix[newRow][j] = matrix[i][j];
-        }
-        newRow++;
-
-        // Вставляем дополнительную строку после текущей строки
-        if (insertRow) {
-            for (int j = 0; j < cols; j++) {
-                newMatrix[newRow][j] = j + 1;  // Значение элементов новой строки: 1, 2, 3, ...
+        // Если содержит, то вставляем новую строку 2, 4, 6, ...
+        if (found) {
+            for (int j = 0; j < m; j++) {
+                new_array[k][j] = (j + 1) * 2;
             }
-            newRow++;
+            k++;
         }
     }
-
-    // Обновляем значения переменных rows и matrix
-    rows = newRows;
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            matrix[i][j] = newMatrix[i][j];
-        }
+    // Освобождаем память из-под старого массива
+    for (int i = 0; i < n; i++) {
+        delete[] array[i];
     }
+    delete[] array;
+    // Присваиваем указателю на старый массив адрес нового массива
+    array = new_array;
+    // Обновляем количество строк
+    n = n + count;
 }
 
+// Главная функция программы
 int main() {
-    int n, m;
-    cout << "Введите количество строк и столбцов: ";
-    cin >> n >> m;
-
-    int matrix[MAX_ROWS][MAX_COLS];
-
-    fillMatrix(matrix, n, m);
-    printMatrix(matrix, n, m);
-
-    replaceMaxWithColumn(matrix, n, m);
-    printMatrix(matrix, n, m);
-
-    insertRowsAfterMin(matrix, n, m);
-    printMatrix(matrix, n, m);
-
+    // Задаем размеры массива
+    int n = 3;
+    int m = 4;
+    // Создаем массив
+    int** array = create_array(n, m);
+    // Заполняем массив
+    int choice;
+    cout << "Выберите способ заполнения массива:" << endl;
+    cout << "1 - случайными числами" << endl;
+    cout << "2 - с клавиатуры" << endl;
+    cin >> choice;
+    switch (choice) {
+        case 1:
+            fill_random(array, n, m);
+            break;
+        case 2:
+            fill_keyboard(array, n, m);
+            break;
+        default:
+            cout << "Неверный выбор" << endl;
+            return 0;
+    }
+    // Выводим массив на экран
+    print_array(array, n, m);
+    // Заменяем максимальный элемент каждой строки номером столбца, в котором он находится
+    replace_max(array, n, m);
+    // Выводим массив на экран
+    cout << "После замены максимальных элементов:" << endl;
+    print_array(array, n, m);
+    // Вставляем после всех строк, содержащих минимальный элемент массива, строку 2, 4, 6, ...
+    insert_row(array, n, m);
+    // Выводим массив на экран
+    cout << "После вставки новых строк:" << endl;
+    print_array(array, n, m);
+    // Освобождаем память из-под массива
+    for (int i = 0; i < n; i++) {
+        delete[] array[i];
+    }
+    delete[] array;
     return 0;
 }
