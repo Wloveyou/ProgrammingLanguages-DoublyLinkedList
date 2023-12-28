@@ -1,6 +1,5 @@
 #include <iostream>
-#include <cstdlib>
-#include <ctime>
+
 using namespace std;
 
 // Класс для представления многомерного массива
